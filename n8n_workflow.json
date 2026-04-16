@@ -1,0 +1,265 @@
+{
+  "name": "n8n_workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:8000/classify",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=text",
+              "value": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        80,
+        304
+      ],
+      "id": "5f29d191-be8c-4cab-8ac1-17ddae9148f1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        320
+      ],
+      "id": "1a9a5a20-19cb-4291-9797-34170ac547cf",
+      "name": "Telegram Trigger",
+      "webhookId": "a8dff134-cef1-42e7-89f8-2f853bb7c20a",
+      "credentials": {
+        "telegramApi": {
+          "id": "Iyxnj9ahDR8nkaip",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "support",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "09b75c19-89b3-43bb-b94a-afc9d2a15dcc"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "985aa215-49eb-480e-87d2-3b0784b79e1e",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "order",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "288f43d5-0481-4eeb-9330-5b061e67578b",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "inquiry",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "b9584992-b299-43e4-8af4-3b129966dfa9",
+                    "leftValue": "={{ $json.intent }}",
+                    "rightValue": "greeting",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        288,
+        304
+      ],
+      "id": "e3643f43-f6cb-4899-a60b-456ecf249e19",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://ntfy.sh/RestaurantBert",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Markdown",
+              "value": "yes"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "=URGENT: Human needed for message: {{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        528,
+        64
+      ],
+      "id": "6e910069-bc3e-4458-9606-9541b019fe79",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "Here is our menu! You can place your order directly at www.demo-myrestaurant.com/order",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        704,
+        288
+      ],
+      "id": "a017d2a4-a18d-4163-a45a-51faa1be83a0",
+      "name": "Send a text message",
+      "webhookId": "cfa10f27-89f1-4f32-8b9e-bf6c65933d4e",
+      "credentials": {
+        "telegramApi": {
+          "id": "Iyxnj9ahDR8nkaip",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "85b21bcd-f43c-47fd-aa2b-59ac007bf407",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "992174be06c9c61f6afecea3aebb96be82799b1bf53686604d1249171055a6b1"
+  },
+  "id": "xmPCFvK1qlLo6yXC",
+  "tags": []
+}
